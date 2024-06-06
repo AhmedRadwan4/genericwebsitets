@@ -1,4 +1,16 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+  reactStrictMode: true,
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "i.ibb.co",
+        hostname: "t3.ftcdn.net",
+        hostname: "static.vecteezy.com",
+      },
+    ],
+  },
+};
 
 export default nextConfig;

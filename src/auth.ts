@@ -51,15 +51,18 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   },
   callbacks: {
     // Disable loging in without verfying email
-    // async signIn({ user }) {
-    //   const userId = user.id || "";
-    //   const existingUser = await getUserById(userId);
+    async signIn({ user, account }) {
+      if (account?.provider !== "credentials") {
+        return true;
+      }
 
-    //   if (!existingUser || !existingUser.emailVerified) {
-    //     return false;
-    //   }
-    //   return true;
-    // },
+      const existingUser = await getUserById(user.id);
+
+      if (!existingUser?.emailVerified) {
+        return false;
+      }
+      return true;
+    },
     async session({ token, session }) {
       if (token.sub && session.user) {
         session.user.id = token.sub;

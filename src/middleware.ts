@@ -5,17 +5,18 @@ import {
   Default_Login_Redirect,
   authRoutes,
   publicRoutes,
+  adminRoutes,
 } from "@/routes";
 
-const { auth } = NextAuth(authConfig);
-
-export default auth((req) => {
+export const { auth: middleware } = NextAuth(authConfig);
+export default middleware((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
+  const isAdminRoute = adminRoutes.includes(nextUrl.pathname);
 
   if (isApiAuthRoute) {
     return;

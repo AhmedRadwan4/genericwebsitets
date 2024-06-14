@@ -1,5 +1,6 @@
 "use client";
 
+import { RxHamburgerMenu } from "react-icons/rx";
 import { Avatar, Dropdown, Navbar } from "flowbite-react";
 import { useSession } from "next-auth/react";
 import { signOut } from "@/auth";
@@ -7,14 +8,8 @@ import { signOut } from "@/auth";
 export default function Header() {
   const { data: session, status } = useSession();
   return (
-    <Navbar fluid rounded>
-      <Navbar.Brand href="https://flowbite-react.com">
-        logo
-        <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
-          name
-        </span>
-      </Navbar.Brand>
-      <div className="flex md:order-2">
+    <Navbar fluid rounded className="justify-between h-14 ">
+      <div className="flex flex-row-reverse md:order-3 w-1/6 ">
         <Dropdown
           arrowIcon={false}
           inline
@@ -27,14 +22,12 @@ export default function Header() {
           }
         >
           <Dropdown.Header>
-            <span className="block text-sm">{session?.user.name}</span>
             <span className="block truncate text-sm font-medium">
-              {session?.user.email}
+              Hello,{session?.user.name || "Guest"}
             </span>
           </Dropdown.Header>
-          <Dropdown.Item>Dashboard</Dropdown.Item>
+          <Dropdown.Item>Orders</Dropdown.Item>
           <Dropdown.Item>Settings</Dropdown.Item>
-          <Dropdown.Item>Earnings</Dropdown.Item>
           <Dropdown.Divider />
           <Dropdown.Item>
             <button onClick={() => signOut({ redirectTo: "/auth/login" })}>
@@ -44,13 +37,23 @@ export default function Header() {
         </Dropdown>
         <Navbar.Toggle />
       </div>
-      <Navbar.Collapse>
-        <Navbar.Link href="#">Home</Navbar.Link>
-        <Navbar.Link href="#">About</Navbar.Link>
-        <Navbar.Link href="#">Services</Navbar.Link>
-        <Navbar.Link href="#">Pricing</Navbar.Link>
-        <Navbar.Link href="#">Contact</Navbar.Link>
-      </Navbar.Collapse>
+      <div className="md:order-1 w-1/6">
+        <Navbar.Collapse>
+          <Navbar.Link href="#" className="flex">
+            <RxHamburgerMenu className="align-middle" />
+            Products
+          </Navbar.Link>
+        </Navbar.Collapse>
+      </div>
+      <Navbar.Brand
+        href="https://flowbite-react.com"
+        className="md:order-2 w-4/6 justify-center"
+      >
+        logo
+        <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
+          name
+        </span>
+      </Navbar.Brand>
     </Navbar>
   );
 }

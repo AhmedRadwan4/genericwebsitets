@@ -59,3 +59,44 @@ model Session {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model VerificationToken {
+  id      String   @id @default(auto()) @map("_id") @db.ObjectId
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model Product {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  brand         String?
+  size          String?
+  fit           String?
+  images        String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime?    @updatedAt
+  Category      Category?    @relation(fields: [categoryId], references: [id])
+  categoryId    String?      @db.ObjectId
+  SubCategory   SubCategory? @relation(fields: [subcategoryId], references: [id])
+  subcategoryId String?      @db.ObjectId
+}
+
+model Category {
+  id          String        @id @default(auto()) @map("_id") @db.ObjectId
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime?     @updatedAt
+  products    Product[]
+  name        String
+  SubCategory SubCategory[]
+}
+
+model SubCategory {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  name       String
+  Category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?   @db.ObjectId
+  Products   Product[]
+}

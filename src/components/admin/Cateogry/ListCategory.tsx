@@ -39,7 +39,12 @@ const ListCategories: React.FC = () => {
 
     GetCategories()
       .then((categories) => {
-        setCategoriesObject(categories);
+        // Ensure that each category has a description property
+        const categoriesWithDescription = categories.map((category: any) => ({
+          ...category,
+          description: category.description ?? null,
+        }));
+        setCategoriesObject(categoriesWithDescription);
         setIsLoading(false); // Set loading state to false after fetching
       })
       .catch((error) => {

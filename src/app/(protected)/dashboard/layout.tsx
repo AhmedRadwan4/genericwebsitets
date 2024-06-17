@@ -8,6 +8,8 @@ import {
   HiShoppingBag,
   HiUser,
 } from "react-icons/hi";
+import { FaBoxes } from "react-icons/fa";
+
 import { FaCodeBranch } from "react-icons/fa6";
 import { TbCategory2 } from "react-icons/tb";
 import { useSession } from "next-auth/react";
@@ -51,6 +53,13 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                 active={pathname === "/dashboard"}
               >
                 Dashboard
+              </Sidebar.Item>
+              <Sidebar.Item
+                href="/dashboard/products"
+                icon={FaBoxes}
+                active={pathname === "/dashboard/products"}
+              >
+                Products
               </Sidebar.Item>
               <Sidebar.Collapse
                 icon={HiShoppingBag}

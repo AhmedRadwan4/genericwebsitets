@@ -35,7 +35,7 @@ declare module "next-auth" {
 export const { auth, handlers, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/auth/login",
-    error: "/auth/login",
+    error: "/auth/error",
   },
   events: {
     async linkAccount({ user }) {

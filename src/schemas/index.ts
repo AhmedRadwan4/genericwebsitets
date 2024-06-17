@@ -18,3 +18,8 @@ export const RegisterSchema = z.object({
 export const CategorySchema = z.object({
   name: z.string().min(1, { message: "Category Name is required" }),
 });
+
+export const SubCategorySchema = z.object({
+  name: z.string().min(1, { message: "Category Name is required" }),
+  categoryId: z.string().min(1, { message: "Category is required" }),
+});

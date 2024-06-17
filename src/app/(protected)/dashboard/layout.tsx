@@ -8,6 +8,7 @@ import {
   HiShoppingBag,
   HiUser,
 } from "react-icons/hi";
+import { FaCodeBranch } from "react-icons/fa6";
 import { TbCategory2 } from "react-icons/tb";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -53,7 +54,7 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               </Sidebar.Item>
               <Sidebar.Collapse
                 icon={HiShoppingBag}
-                label="Products"
+                label="Categorization"
                 open={true}
               >
                 <Sidebar.Item
@@ -64,17 +65,26 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
                   Categories
                 </Sidebar.Item>
                 <Sidebar.Item
-                  href="/dashboard/users"
-                  icon={HiUser}
-                  active={pathname === "/dashboard/users"}
+                  href="/dashboard/subcategories"
+                  icon={FaCodeBranch}
+                  active={pathname === "/dashboard/subcategories"}
                 >
-                  Users
-                </Sidebar.Item>
-
-                <Sidebar.Item href="#" icon={HiInbox}>
-                  Orders
+                  SubCategories
                 </Sidebar.Item>
               </Sidebar.Collapse>
+            </Sidebar.ItemGroup>
+            <Sidebar.ItemGroup>
+              <Sidebar.Item
+                href="/dashboard/users"
+                icon={HiUser}
+                active={pathname === "/dashboard/users"}
+              >
+                Users
+              </Sidebar.Item>
+
+              <Sidebar.Item href="#" icon={HiInbox}>
+                Orders
+              </Sidebar.Item>
             </Sidebar.ItemGroup>
             <Sidebar.ItemGroup>
               <Sidebar.Item href="#" icon={HiArrowSmRight}>

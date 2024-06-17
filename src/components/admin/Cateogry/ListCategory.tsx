@@ -14,7 +14,6 @@ interface Category {
   createdAt: Date;
   updatedAt: Date | null;
   name: string;
-  description: string | null;
 }
 
 // Functional component ListCategories

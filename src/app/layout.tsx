@@ -16,6 +16,10 @@ export default async function RootLayout({
   return (
     <html lang="en" className="scroll-smooth">
       <head>
+        <meta property="description" content="Generic E-commerce Website" />
+        <meta property="og:image" content="/favicon.ico"></meta>
+        <meta property="og:site_name" content="E-commerce Test Website"></meta>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <title>Generic Website</title>
         <ThemeModeScript />
       </head>

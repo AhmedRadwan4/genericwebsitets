@@ -1,7 +1,6 @@
 "use client";
 import { useDispatch, useSelector } from "react-redux";
 import { addItem, deleteItem } from "../../redux/slices/cartslice";
-import * as im from "@/../public/1.jpg";
 import { Carousel, Card } from "flowbite-react";
 import Image from "next/image";
 import { RootState } from "../../redux/store"; // Adjust the path to your store
@@ -26,7 +25,13 @@ export default function Home() {
   return (
     <div className="grid h-full pt-9 ">
       <Carousel pauseOnHover className="h-80">
-        <Image src={im} alt="..." height={800} width={800} quality={100} />
+        <Image
+          src="/../../public/1.jpg"
+          alt="..."
+          height={800}
+          width={800}
+          quality={100}
+        />
         <Image
           src="https://flowbite.com/docs/images/carousel/carousel-2.svg"
           alt="..."

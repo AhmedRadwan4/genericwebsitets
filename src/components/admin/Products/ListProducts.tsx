@@ -10,8 +10,7 @@ import { toast } from "react-toastify"; // Toast notifications library
 import { Product } from "@prisma/client";
 import GetProductCategory from "./GetProductCategory";
 import GetProductSubCategory from "./SubProducts/GetProductSubCategory";
-import SubProductsPage from "@/app/(protected)/dashboard/subproducts/page";
-import SubProducts from "./SubProducts/SubProducts";
+import SubProducts from "./SubProducts/ListSubProducts";
 import Link from "next/link";
 
 // Functional component ListProducts

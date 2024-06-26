@@ -34,7 +34,6 @@ const SubProductsComponent: React.FC<SubProductsComponentProps> = ({
       {subProducts.map((subProduct) => (
         <div key={subProduct.id} className="flex flex-row justify-between">
           <p>SKU:{subProduct.sku}</p>
-          <p>Fit: {subProduct.fit}</p>
           <p>Price: {subProduct.price}</p>
           <p>Stock: {subProduct.stock}</p>
           <p>Discount: {subProduct.discount}%</p>

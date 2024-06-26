@@ -9,6 +9,7 @@ const nextConfig = {
         hostname: "t3.ftcdn.net",
         hostname: "static.vecteezy.com",
         hostname: "google.com",
+        hostname: "generalecommerce.s3.eu-north-1.amazonaws.com",
       },
     ],
   },

@@ -22,27 +22,25 @@ model User {
   role          UserRole  @default(USER)
   accounts      Account[]
   sessions      Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Account {
-  id                String  @id @default(auto()) @map("_id") @db.ObjectId
-  userId            String  @db.ObjectId
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String   @db.ObjectId
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.String
-  access_token      String? @db.String
+  refresh_token     String?  @db.String
+  access_token      String?  @db.String
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.String
+  id_token          String?  @db.String
   session_state     String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -55,9 +53,8 @@ model Session {
   userId       String   @db.ObjectId
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model VerificationToken {
@@ -73,30 +70,57 @@ model Product {
   id            String       @id @default(auto()) @map("_id") @db.ObjectId
   name          String
   brand         String?
-  size          String?
-  fit           String?
-  images        String?
+  description   String?
   createdAt     DateTime     @default(now())
   updatedAt     DateTime?    @updatedAt
-  Category      Category?    @relation(fields: [categoryId], references: [id])
-  categoryId    String?      @db.ObjectId
-  SubCategory   SubCategory? @relation(fields: [subcategoryId], references: [id])
-  subcategoryId String?      @db.ObjectId
+  categoryId    String       @db.ObjectId
+  subCategoryId String       @db.ObjectId
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subCategory   SubCategory  @relation(fields: [subCategoryId], references: [id])
+  subProducts   SubProduct[]
+}
+
+model SubProduct {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sku       String?
+  price     Int?
+  stock     Int?
+  discount  Int?     @default(0)
+  sold      Int?     @default(0)
+  images    String[]
+  colorId   String?  @db.ObjectId
+  sizeId    String?  @db.ObjectId
+  productId String   @db.ObjectId
+  color     Color?   @relation(fields: [colorId], references: [id])
+  size      Size?    @relation(fields: [sizeId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+}
+
+model Color {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  color       String?
+  subProducts SubProduct[]
+}
+
+model Size {
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  size        String
+  subProducts SubProduct[]
 }
 
 model Category {
-  id          String        @id @default(auto()) @map("_id") @db.ObjectId
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime?     @updatedAt
-  products    Product[]
-  name        String
-  SubCategory SubCategory[]
+  id            String        @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime?     @updatedAt
+  products      Product[]
+  subCategories SubCategory[]
 }
 
 model SubCategory {
   id         String    @id @default(auto()) @map("_id") @db.ObjectId
   name       String
-  Category   Category? @relation(fields: [categoryId], references: [id])
   categoryId String?   @db.ObjectId
-  Products   Product[]
+  category   Category? @relation(fields: [categoryId], references: [id])
+  products   Product[]
 }

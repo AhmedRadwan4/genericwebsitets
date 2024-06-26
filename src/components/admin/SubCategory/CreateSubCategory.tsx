@@ -13,7 +13,7 @@ import { Input } from "../../ui/input";
 import { Button } from "../../ui/button";
 import { CheckThenAddSubCategory } from "./CheckThenAddSubCategory";
 import { useSubCategoryContext } from "./SubCategoryProvider";
-import GetCategories from "../Cateogry/GetCategories";
+import { GetCategories } from "../Cateogry/GetCategories";
 import {
   Form,
   FormControl,
@@ -29,13 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-interface Category {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-  name: string;
-}
+import { Category } from "@prisma/client";
 
 export default function CreateSubCategory() {
   const { refresh } = useSubCategoryContext();
@@ -84,7 +78,10 @@ export default function CreateSubCategory() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(OnSubmit)} className="space-y-6">
+      <form
+        onSubmit={form.handleSubmit(OnSubmit)}
+        className="space-y-6 w-1/2 mx-auto"
+      >
         {/* subcategory name */}
         <FormField
           control={form.control}

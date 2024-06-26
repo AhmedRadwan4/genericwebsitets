@@ -1,20 +1,13 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import GetCategories from "./GetCategories"; // Function to fetch categories from API
+import { GetCategories } from "./GetCategories"; // Function to fetch categories from API
 import { FaRegEdit, FaSave, FaTrash } from "react-icons/fa"; // Icons for edit, save, delete
 import { Button, Modal } from "flowbite-react"; // Modal and button components from flowbite-react
 import { HiOutlineExclamationCircle } from "react-icons/hi"; // Icon for delete confirmation
 import DeleteCategory from "./DeleteCategory"; // Component to handle category deletion
 import EditCategory from "./EditCategory"; // Component to handle category editing API calls
 import { toast } from "react-toastify"; // Toast notifications library
-
-// Interface for defining the structure of a Category
-interface Category {
-  id: string;
-  createdAt: Date;
-  updatedAt: Date | null;
-  name: string;
-}
+import { Category } from "@prisma/client";
 
 // Functional component ListCategories
 const ListCategories: React.FC = () => {
@@ -69,13 +62,23 @@ const ListCategories: React.FC = () => {
 
   // Function to handle saving changes after editing
   const handleSaveClick = async (categoryId: string, editedName: string) => {
-    // Perform validation if necessary before saving
-    if (editedName.trim() === "") {
-      alert("Category name cannot be empty");
-      return;
-    }
-
     try {
+      // Perform validation if necessary before saving
+      if (editedName.trim() === "") {
+        toast.error("Category name cannot be empty");
+        return;
+      }
+
+      // Check if the edited name already exists in any other category
+      const existingCategory = categoriesObject.find(
+        (category) => category.name === editedName && category.id !== categoryId
+      );
+
+      if (existingCategory) {
+        toast.error("Category name already exists");
+        return;
+      }
+
       // Call EditCategory function to update category name
       await EditCategory(categoryId, editedName);
 
@@ -87,12 +90,15 @@ const ListCategories: React.FC = () => {
             : category
         )
       );
+
       toast.success("Category Updated"); // Display success toast notification
+
       // Reset edit mode
       setEditId(null); // Exit edit mode
       setIsEditing(false); // Exit edit mode
     } catch (error) {
       console.error("Error editing category:", error);
+      toast.error("Failed to update category"); // Display error toast notification
       // Handle error editing category
     }
   };
@@ -105,15 +111,20 @@ const ListCategories: React.FC = () => {
 
   // Function to handle clicking on the delete button
   const handleDeleteClick = async (categoryId: string) => {
-    setCategoriesObject((prevCategories) =>
-      prevCategories.filter((category) => category.id !== categoryId)
-    );
     try {
-      await DeleteCategory(categoryId); // Call DeleteCategory function to delete the category
+      // Filter out the deleted category from categoriesObject
+      setCategoriesObject((prevCategories) =>
+        prevCategories.filter((category) => category.id !== categoryId)
+      );
+
+      // Call DeleteCategory function to delete the category
+      await DeleteCategory(categoryId);
+
       setOpenModal(false); // Close the delete confirmation modal
       toast.success("Category Deleted"); // Display success toast notification
     } catch (error) {
       console.error("Error deleting category:", error);
+      toast.error("Failed to delete category"); // Display error toast notification
       // Handle error deleting category
     }
   };

@@ -1,16 +1,16 @@
 "use client";
 import React, { useEffect, useState, useRef } from "react";
-import GetSubCategories from "./GetSubCategories"; // Function to fetch categories from API
-import GetCategories from "../Cateogry/GetCategories";
+import { GetSubCategories } from "./GetSubCategories"; // Function to fetch subcategories from API
+import { GetCategories } from "../Cateogry/GetCategories"; // Function to fetch categories from API
 import { FaRegEdit, FaSave, FaTrash } from "react-icons/fa"; // Icons for edit, save, delete
 import { Button, Modal } from "flowbite-react"; // Modal and button components from flowbite-react
 import { HiOutlineExclamationCircle } from "react-icons/hi"; // Icon for delete confirmation
-import DeleteSubCategory from "./DeleteSubCategory"; // Component to handle category deletion
-import EditSubCategory from "./EditSubCategory"; // Component to handle category editing API calls
+import DeleteSubCategory from "./DeleteSubCategory"; // Component to handle subcategory deletion
+import EditSubCategory from "./EditSubCategory"; // Function to handle subcategory editing API calls
 import { toast } from "react-toastify"; // Toast notifications library
 import { useSubCategoryContext } from "./SubCategoryProvider"; // Adjust the path accordingly
 
-// Interface for defining the structure of a Category
+// Interface for defining the structure of a SubCategory
 interface SubCategory {
   id: string;
   createdAt: Date;
@@ -35,8 +35,9 @@ const ListsSubCategories: React.FC = () => {
   const [editedName, setEditedName] = useState<string>("");
   const [editedMainCategoryId, setEditedMainCategoryId] = useState<string>("");
   const [openModal, setOpenModal] = useState(false);
-  const [subcategoryIdToDelete, setCategoryIdToDelete] = useState<string>("");
-  const [subcategoryNameToDelete, setCategoryNameToDelete] =
+  const [subcategoryIdToDelete, setSubcategoryIdToDelete] =
+    useState<string>("");
+  const [subcategoryNameToDelete, setSubcategoryNameToDelete] =
     useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
 
@@ -44,7 +45,6 @@ const ListsSubCategories: React.FC = () => {
 
   const fetchSubCategories = async () => {
     setIsLoading(true);
-
     try {
       const subCategories = await GetSubCategories();
       const categoriesWithDescription = subCategories.map(
@@ -56,7 +56,7 @@ const ListsSubCategories: React.FC = () => {
       setSubCategoriesObject(categoriesWithDescription);
       setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching categories:", error);
+      console.error("Error fetching subcategories:", error);
       setIsLoading(false);
     }
   };
@@ -92,56 +92,72 @@ const ListsSubCategories: React.FC = () => {
     editedName: string,
     editedMainCategoryId: string
   ) => {
-    if (editedName.trim() === "") {
-      alert("SubCategory name cannot be empty");
-      return;
-    }
-
     try {
-      await EditSubCategory(subcategoryId, editedName, editedMainCategoryId);
-      setSubCategoriesObject((prevSubCategories) =>
-        prevSubCategories.map((subcategory) =>
-          subcategory.id === subcategoryId
-            ? {
-                ...subcategory,
-                name: editedName,
-                mainCategoryId: editedMainCategoryId,
-              }
-            : subcategory
-        )
+      if (editedName.trim() === "") {
+        toast.error("SubCategory name cannot be empty");
+        return;
+      }
+
+      const result = await EditSubCategory(
+        subcategoryId,
+        editedName,
+        editedMainCategoryId
       );
-      toast.success("SubCategory Updated");
-      setEditId(null);
+
+      if (result.success) {
+        // Update subcategoriesObject with updated data
+        setSubCategoriesObject((prevSubCategories) =>
+          prevSubCategories.map((subcategory) =>
+            subcategory.id === subcategoryId
+              ? {
+                  ...subcategory,
+                  name: editedName,
+                  mainCategoryId: editedMainCategoryId,
+                }
+              : subcategory
+          )
+        );
+
+        toast.success("SubCategory Updated");
+        setEditId(null); // Exit edit mode
+      } else {
+        toast.error(result.error ?? "Failed to update SubCategory");
+      }
     } catch (error) {
       console.error("Error editing SubCategory:", error);
+      toast.error("Failed to update SubCategory");
     }
   };
 
   const handleCancelEdit = () => {
-    setEditId(null);
+    setEditId(null); // Reset edit state
   };
 
   const handleDeleteClick = async (subcategoryId: string) => {
-    setSubCategoriesObject((prevSubCategories) =>
-      prevSubCategories.filter(
-        (subcategory) => subcategory.id !== subcategoryId
-      )
-    );
     try {
+      // Remove subcategory from local state
+      setSubCategoriesObject((prevSubCategories) =>
+        prevSubCategories.filter(
+          (subcategory) => subcategory.id !== subcategoryId
+        )
+      );
+
+      // Call delete function
       await DeleteSubCategory(subcategoryId);
-      setOpenModal(false);
+
+      setOpenModal(false); // Close delete confirmation modal
       toast.success("SubCategory Deleted");
     } catch (error) {
       console.error("Error deleting SubCategory:", error);
+      toast.error("Failed to delete SubCategory");
     }
   };
 
   const openDeleteModal = (subcategory: SubCategory) => {
-    setCategoryIdToDelete(subcategory.id);
-    setCategoryNameToDelete(subcategory.name);
+    setSubcategoryIdToDelete(subcategory.id);
+    setSubcategoryNameToDelete(subcategory.name);
     setOpenModal(true);
   };
-
   return (
     <>
       {isLoading && (

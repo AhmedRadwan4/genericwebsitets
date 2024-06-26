@@ -1,9 +1,10 @@
 import { configureStore } from "@reduxjs/toolkit";
-import cartslice from "./slices/cartslice";
+import cartReducer from "./slices/cartslice";
 
 export const store = configureStore({
-  reducer: { cartslice },
-  devTools: process.env.NODE_ENV !== "production",
+  reducer: {
+    cart: cartReducer,
+  },
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -14,9 +14,9 @@
     "jsx": "preserve",
     "outDir": "./lib/cjs/",
     "sourceMap": true,
-    "declaration": true,
+    "declaration": false,
     "noImplicitAny": true,
-    "target": "es5",
+    "target": "ES6",
     "incremental": true,
     "plugins": [
       {
@@ -27,6 +27,6 @@
       "@/*": ["./src/*"],
     }
   },
-  "include": ["src/**/*.ts*","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","*/*.ts", "src/components/auth/unauthedheader/script.js"],
+  "include": ["src/**/*.ts*","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","*/*.ts", "src/components/auth/unauthedheader/script.js", "src/server.js"],
   "exclude": ["node_modules", "dist", "lib"]
 }

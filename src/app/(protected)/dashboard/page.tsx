@@ -6,5 +6,9 @@ export default async function Dashboard() {
     return <div>Not authenticated</div>;
   }
 
-  return <div className="container">dashboard{session.user.role}</div>;
+  return (
+    <div className="container">
+      here should be a dashboard <br /> you are an:{session.user.role}
+    </div>
+  );
 }

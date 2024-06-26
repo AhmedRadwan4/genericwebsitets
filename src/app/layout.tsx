@@ -26,9 +26,8 @@ export default async function RootLayout({
       <body className="grid bg-white overflow-x-hidden">
         <SessionProvider session={session}>
           <SubCategoryProvider>
-            <main>{children}</main>
-
-            <div className="">
+            <main className="columns-7 h-full flex">{children}</main>
+            <div>
               <Footer />
             </div>
             <ToastContainer />

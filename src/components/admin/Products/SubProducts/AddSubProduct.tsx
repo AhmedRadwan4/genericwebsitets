@@ -19,20 +19,17 @@ import {
   CreateSubProduct,
 } from "@/components/admin/Products/SubProducts/CreateSubProduct";
 import { UploadToS3 } from "@/components/uploadImageToS3";
-import { Product } from "@prisma/client";
 import { toast } from "react-toastify";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { BsImages, BsPaperclip } from "react-icons/bs";
 import Image from "next/image";
 
-export default function AddSubProduct(product: Product) {
+export default function AddSubProduct(pId: any) {
+  const pIdValue = pId.pId;
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
-  const searchParams = useSearchParams();
-  const pId = searchParams.get("productId")?.toString() || product.id;
-
   const form = useForm<z.infer<typeof SubProductSchema>>({
     resolver: zodResolver(SubProductSchema),
     defaultValues: {
@@ -68,7 +65,7 @@ export default function AddSubProduct(product: Product) {
       }
 
       try {
-        const error = await CreateSubProduct(pId, data);
+        const error = await CreateSubProduct(pIdValue, data);
 
         if (error.error) {
           toast.error("Product Already Exists");

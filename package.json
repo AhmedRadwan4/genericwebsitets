@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && next build && ts-node src/server.js",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate && ts-node src/server.ts",
+    "postinstall": "prisma generate",
     "start:server": "ts-node src/server.js"
   },
   "dependencies": {

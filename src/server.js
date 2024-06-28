@@ -3,18 +3,20 @@ import multer from "multer";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import cors from "cors";
 import dotenv from "dotenv";
-import { v4 as uuidv4 } from "uuid"; // Import uuidv4 to generate unique identifiers
+import { v4 as uuidv4 } from "uuid";
+import helmet from "helmet";
+import morgan from "morgan";
 
 dotenv.config();
 
 const app = express();
 const upload = multer();
-const port = 3001;
+const port = process.env.PORT || 3001;
 
-const REGION = process.env.NEXT_PUBLIC_AWS_REGION;
-const ACCESS_KEY = process.env.NEXT_PUBLIC_AWS_ACCESS_KEY;
-const SECRET_KEY = process.env.NEXT_PUBLIC_AWS_SECRET_KEY;
-const BUCKET_NAME = process.env.NEXT_PUBLIC_AWS_BUCKET_NAME;
+const REGION = process.env.AWS_REGION;
+const ACCESS_KEY = process.env.AWS_ACCESS_KEY;
+const SECRET_KEY = process.env.AWS_SECRET_KEY;
+const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 if (!REGION || !ACCESS_KEY || !SECRET_KEY || !BUCKET_NAME) {
   throw new Error("Missing necessary AWS configuration environment variables.");
@@ -28,13 +30,18 @@ const s3Client = new S3Client({
   },
 });
 
-app.use(cors());
+const corsOptions = {
+  origin: "localhost:3000",
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
+app.use(helmet());
+app.use(morgan("combined"));
 app.use(express.json());
 
-// Define a function to generate a unique filename
 const generateUniqueFilename = (originalName) => {
-  const uniqueSuffix = uuidv4(); // Generate a unique identifier
-  const fileExtension = originalName.split(".").pop(); // Get file extension from original name
+  const uniqueSuffix = uuidv4();
+  const fileExtension = originalName.split(".").pop();
   return `${uniqueSuffix}.${fileExtension}`;
 };
 
@@ -49,7 +56,7 @@ app.post("/upload", upload.single("file"), async (req, res) => {
 
   const params = {
     Bucket: BUCKET_NAME,
-    Key: `${uniqueFileName}`, // Use the unique filename here
+    Key: `${uniqueFileName}`,
     Body: file.buffer,
     ACL: "public-read",
   };

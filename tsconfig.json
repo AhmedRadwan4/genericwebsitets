@@ -27,6 +27,6 @@
       "@/*": ["./src/*"],
     }
   },
-  "include": ["src/**/*.ts*","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","*/*.ts", "src/components/auth/unauthedheader/script.js", "src/server.js"],
+  "include": ["src/**/*.ts*","next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts","*/*.ts", "src/components/auth/unauthedheader/script.js", "src/server.ts"],
   "exclude": ["node_modules", "dist", "lib"]
 }

@@ -48,7 +48,9 @@ const ListProducts: React.FC = () => {
     //TODO: Handle edit click
   };
 
-  const handleAddClick = async (product: Product) => {};
+  const handleAddClick = async (product: Product) => {
+    //TODO: Handle edit click
+  };
 
   // Function to handle clicking on the delete button
   const handleDeleteClick = async (productId: string) => {

@@ -18,12 +18,38 @@ import {
   CheckSubProductExists,
   CreateSubProduct,
 } from "@/components/admin/Products/SubProducts/CreateSubProduct";
-import { UploadToS3 } from "@/components/uploadImageToS3";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { BsImages, BsPaperclip } from "react-icons/bs";
 import Image from "next/image";
+import axios from "axios";
+
+async function UploadToS3(file: File): Promise<string | null> {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const response = await axios.post(
+      "http://localhost:3001/upload",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error("Failed to upload file.");
+    }
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    return null;
+  }
+}
 
 export default function AddSubProduct(pId: any) {
   const pIdValue = pId.pId;
@@ -99,7 +125,7 @@ export default function AddSubProduct(pId: any) {
                   <Input
                     {...field}
                     disabled={isPending}
-                    placeholder="Enter Serial Number"
+                    placeholder="Enter Stock Keeping Unit"
                     type="text"
                     autoComplete="off"
                   />

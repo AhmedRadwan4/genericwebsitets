@@ -30,8 +30,9 @@ async function UploadToS3(file: File): Promise<string | null> {
   formData.append("file", file);
 
   try {
+    console.log("hostname", window.location.hostname);
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URL}/upload`,
+      `https://${window.location.hostname}:3001/upload`,
       formData,
       {
         headers: {

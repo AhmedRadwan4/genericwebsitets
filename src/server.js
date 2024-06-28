@@ -30,10 +30,6 @@ const s3Client = new S3Client({
   },
 });
 
-const corsOptions = {
-  origin: "localhost:3000",
-  optionsSuccessStatus: 200,
-};
 app.use(cors(corsOptions));
 app.use(helmet());
 app.use(morgan("combined"));

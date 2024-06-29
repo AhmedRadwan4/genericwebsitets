@@ -82,7 +82,7 @@ model Product {
 
 model SubProduct {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  sku       String?
+  sku       String
   price     Int?
   stock     Int?
   discount  Int?     @default(0)

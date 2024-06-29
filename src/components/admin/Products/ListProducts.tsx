@@ -21,6 +21,9 @@ const ListProducts: React.FC = () => {
   const [productIdToDelete, setProductIdToDelete] = useState<string>(""); // ID of product to delete
   const [productNameToDelete, setProductNameToDelete] = useState<string>(""); // Name of product to delete
   const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [expandedProductId, setExpandedProductId] = useState<string | null>(
+    null
+  ); // State to track expanded product for subproducts
 
   // Effect to fetch products when component mounts
   useEffect(() => {
@@ -49,7 +52,7 @@ const ListProducts: React.FC = () => {
   };
 
   const handleAddClick = async (product: Product) => {
-    //TODO: Handle edit click
+    //TODO: Handle add click
   };
 
   // Function to handle clicking on the delete button
@@ -72,6 +75,11 @@ const ListProducts: React.FC = () => {
     setProductIdToDelete(product.id); // Set productIdToDelete to the ID of the product to delete
     setProductNameToDelete(product.name); // Set productNameToDelete to the name of the product to delete
     setOpenModal(true); // Open the delete confirmation modal
+  };
+
+  // Function to toggle the visibility of subproducts
+  const toggleSubProducts = (productId: string) => {
+    setExpandedProductId((prevId) => (prevId === productId ? null : productId));
   };
 
   // JSX returned by the component
@@ -109,57 +117,64 @@ const ListProducts: React.FC = () => {
             {ProductsObject.map((product) => (
               <li
                 key={product.id}
-                className="p-4 w-10/12 bg-white shadow-md rounded-lg transition-transform transform hover:scale-105 hover:shadow-lg dark:bg-gray-800 dark:text-white"
+                className="p-4 w-10/12 bg-white shadow-md rounded-lg transition-transform transform hover:shadow-lg dark:bg-gray-800 dark:text-white"
               >
-                {
-                  <>
-                    <span className="flex-1">{product.name}</span>
-                    {/* Render edit and delete buttons */}
-                    <div className="mt-4  flex flex-row-reverse space-x-2">
-                      <button
-                        onClick={() => openDeleteModal(product)}
-                        className="text-red-500 hover:text-red-700 "
-                      >
-                        <FaTrash size={20} />
-                      </button>
+                <div className="flex justify-between items-center">
+                  <span className="flex-1">{product.name}</span>
+                  {/* Render edit, add, and delete buttons */}
+                  <div className="mt-4 flex flex-row-reverse space-x-2">
+                    <button
+                      onClick={() => openDeleteModal(product)}
+                      className="text-red-500 hover:text-red-700 "
+                    >
+                      <FaTrash size={20} />
+                    </button>
 
-                      <button
-                        onClick={() => handleEditClick(product)}
-                        className="text-blue-500 hover:text-blue-700"
-                      >
-                        <FaRegEdit size={20} />
-                      </button>
-                      <Link
-                        href={{
-                          pathname: "/dashboard/subproducts",
-                          query: { id: product.id },
-                        }}
-                        className="text-green-500 hover:green-700 "
-                      >
-                        <IoMdAddCircleOutline size={20} />
-                      </Link>
-                    </div>
-                    {/* Render product details */}
-                    <ul className="list-none pl-6 flex flex-col ">
-                      <li>Description: {product.description}</li>
-                      <li>
-                        Category:{" "}
-                        <GetProductCategory
-                          productCategoryId={product.categoryId}
-                        />
-                      </li>
-                      <li>
-                        SubCategory:{" "}
-                        <GetProductSubCategory
-                          productsubCategoryId={product.subCategoryId}
-                        />
-                      </li>
-                      <li className="grid">
-                        <SubProducts ProductId={product.id} />
-                      </li>
-                    </ul>
-                  </>
-                }
+                    <button
+                      onClick={() => handleEditClick(product)}
+                      className="text-blue-500 hover:text-blue-700"
+                    >
+                      <FaRegEdit size={20} />
+                    </button>
+                    <Link
+                      href={{
+                        pathname: "/dashboard/subproducts",
+                        query: { id: product.id },
+                      }}
+                      className="text-green-500 hover:green-700 "
+                    >
+                      <IoMdAddCircleOutline size={20} />
+                    </Link>
+                    <button
+                      onClick={() => toggleSubProducts(product.id)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      {expandedProductId === product.id ? "Hide" : "Show"}{" "}
+                      Subproducts
+                    </button>
+                  </div>
+                </div>
+                {/* Render product details */}
+                <ul className="list-none pl-6 flex flex-col ">
+                  <li>Description: {product.description}</li>
+                  <li>
+                    Category:{" "}
+                    <GetProductCategory
+                      productCategoryId={product.categoryId}
+                    />
+                  </li>
+                  <li>
+                    SubCategory:{" "}
+                    <GetProductSubCategory
+                      productsubCategoryId={product.subCategoryId}
+                    />
+                  </li>
+                  {expandedProductId === product.id && (
+                    <li className="grid">
+                      <SubProducts ProductId={product.id} />
+                    </li>
+                  )}
+                </ul>
               </li>
             ))}
           </ul>

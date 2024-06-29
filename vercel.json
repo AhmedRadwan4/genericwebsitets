@@ -1,0 +1,8 @@
+{
+    "functions": {
+      "src/*": {
+        "runtime": "nodejs14.x"
+      }
+    }
+  }
+  

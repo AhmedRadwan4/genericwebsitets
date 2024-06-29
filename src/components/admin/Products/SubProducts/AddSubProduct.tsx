@@ -31,7 +31,9 @@ async function UploadToS3(file: File): Promise<string | null> {
 
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/upload`,
+      // external express server for handling aws s3 uploading
+      // https://github.com/AhmedRadwan4/express
+      `https://express-cc5fmqj8t-ahmedradwan4s-projects.vercel.app/upload`,
       formData,
       {
         headers: {

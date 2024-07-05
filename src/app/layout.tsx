@@ -5,7 +5,7 @@ import SessionProvider from "../components/SessionProvider/SessionProvider";
 import { ThemeModeScript } from "flowbite-react";
 import { auth } from "../auth";
 import { ToastContainer } from "react-toastify";
-import { SubCategoryProvider } from "@/components/admin/SubCategory/SubCategoryProvider";
+import { CategoryProvider } from "@/components/admin/Categories/CategoryProvider";
 
 export default async function RootLayout({
   children,
@@ -25,13 +25,13 @@ export default async function RootLayout({
       </head>
       <body className="grid bg-white overflow-x-hidden">
         <SessionProvider session={session}>
-          <SubCategoryProvider>
+          <CategoryProvider>
             <main className="columns-7 h-full flex">{children}</main>
             <div>
               <Footer />
             </div>
             <ToastContainer />
-          </SubCategoryProvider>
+          </CategoryProvider>
         </SessionProvider>
       </body>
     </html>

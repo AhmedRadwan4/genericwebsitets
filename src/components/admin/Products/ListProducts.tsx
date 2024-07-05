@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import GetProducts from "./GetProducts"; // Function to fetch products from API
 import { FaRegEdit, FaTrash } from "react-icons/fa"; // Icons for edit, save, delete
 import { IoMdAddCircleOutline } from "react-icons/io"; // Icon for add product
@@ -7,16 +8,16 @@ import { Button, Modal } from "flowbite-react"; // Modal and button components f
 import { HiOutlineExclamationCircle } from "react-icons/hi"; // Icon for delete confirmation
 import DeleteProduct from "./DeleteProduct"; // Component to handle product deletion
 import { toast } from "react-toastify"; // Toast notifications library
-import { Product } from "@prisma/client";
-import GetProductCategory from "./GetProductCategory";
-import GetProductSubCategory from "./SubProducts/GetProductSubCategory";
-import SubProducts from "./SubProducts/ListSubProducts";
-import Link from "next/link";
+import { Product, ProductCategory } from "@prisma/client";
+import { GetCategory } from "../Categories/GetCategories"; // Assuming getCategory is the correct function name
 
 // Functional component ListProducts
 const ListProducts: React.FC = () => {
   // State variables
-  const [ProductsObject, setProductsObject] = useState<Product[]>([]); // Array of products fetched from API
+  const [productsObject, setProductsObject] = useState<Product[]>([]); // Array of products fetched from API
+  const [categoriesMap, setCategoriesMap] = useState<Record<string, string>>(
+    {}
+  ); // Map of category IDs to category names
   const [openModal, setOpenModal] = useState(false); // Control modal visibility for delete confirmation
   const [productIdToDelete, setProductIdToDelete] = useState<string>(""); // ID of product to delete
   const [productNameToDelete, setProductNameToDelete] = useState<string>(""); // Name of product to delete
@@ -25,34 +26,57 @@ const ListProducts: React.FC = () => {
     null
   ); // State to track expanded product for subproducts
 
-  // Effect to fetch products when component mounts
+  // Effect to fetch products and categories when component mounts
   useEffect(() => {
-    setIsLoading(true); // Set loading state to true before fetching
+    const fetchProductsAndCategories = async () => {
+      setIsLoading(true); // Set loading state to true before fetching
 
-    GetProducts()
-      .then((products) => {
-        // Ensure that each product has a description property
-        const productsWithDescription = products.map((product: any) => ({
-          ...product,
-          description: product.description ?? null,
-        }));
-        setProductsObject(productsWithDescription);
+      try {
+        const products = await GetProducts();
+        setProductsObject(products); // Update state with fetched products
+
+        const categoryIds = Array.from(
+          new Set(products.map((product) => product.categoryId))
+        ); // Extract unique category IDs
+
+        // Fetch categories including their parent categories
+        const fetchCategoryHierarchy = async (
+          categoryId: string,
+          hierarchy: string[] = []
+        ): Promise<string[]> => {
+          const category = await GetCategory(categoryId);
+          if (category) {
+            hierarchy.unshift(category.categoryName);
+            if (category.parentCategoryId) {
+              return fetchCategoryHierarchy(
+                category.parentCategoryId,
+                hierarchy
+              );
+            }
+          }
+          return hierarchy;
+        };
+
+        const categoriesMap = {} as Record<string, string>;
+        for (const id of categoryIds) {
+          const hierarchy = await fetchCategoryHierarchy(id);
+          categoriesMap[id] = hierarchy.join(" > ");
+        }
+
+        setCategoriesMap(categoriesMap); // Update state with fetched categories
+      } catch (error) {
+        console.error("Error fetching products or categories:", error);
+        // Handle error fetching products or categories
+      } finally {
         setIsLoading(false); // Set loading state to false after fetching
-      })
-      .catch((error) => {
-        console.error("Error fetching products:", error);
-        setIsLoading(false); // Set loading state to false in case of error
-        // Handle error fetching products
-      });
-  }, []);
+      }
+    };
 
+    fetchProductsAndCategories();
+  }, []);
   // Function to handle clicking on the edit button
   const handleEditClick = async (product: Product) => {
-    //TODO: Handle edit click
-  };
-
-  const handleAddClick = async (product: Product) => {
-    //TODO: Handle add click
+    // TODO: Handle edit click
   };
 
   // Function to handle clicking on the delete button
@@ -113,8 +137,8 @@ const ListProducts: React.FC = () => {
       {/* Render the list of products if not loading */}
       {!isLoading && (
         <>
-          <ul className="space-y-4 p-10 flex justify-center w-dvw flex-col">
-            {ProductsObject.map((product) => (
+          <ul className="space-y-4 p-10 flex justify-center w-full flex-col">
+            {productsObject.map((product) => (
               <li
                 key={product.id}
                 className="p-4 w-10/12 bg-white shadow-md rounded-lg transition-transform transform hover:shadow-lg dark:bg-gray-800 dark:text-white"
@@ -136,15 +160,12 @@ const ListProducts: React.FC = () => {
                     >
                       <FaRegEdit size={20} />
                     </button>
-                    <Link
-                      href={{
-                        pathname: "/dashboard/subproducts",
-                        query: { id: product.id },
-                      }}
-                      className="text-green-500 hover:green-700 "
+                    <a
+                      href={`/dashboard/subproducts?id=${product.id}`}
+                      className="text-green-500 hover:green-700"
                     >
                       <IoMdAddCircleOutline size={20} />
-                    </Link>
+                    </a>
                     <button
                       onClick={() => toggleSubProducts(product.id)}
                       className="text-gray-500 hover:text-gray-700"
@@ -159,21 +180,16 @@ const ListProducts: React.FC = () => {
                   <li>Description: {product.description}</li>
                   <li>
                     Category:{" "}
-                    <GetProductCategory
-                      productCategoryId={product.categoryId}
-                    />
+                    {categoriesMap[product.categoryId] || "Loading..."}
                   </li>
                   <li>
-                    SubCategory:{" "}
-                    <GetProductSubCategory
-                      productsubCategoryId={product.subCategoryId}
+                    <Image
+                      src={product.productImage}
+                      width={200}
+                      height={200}
+                      alt="product image"
                     />
                   </li>
-                  {expandedProductId === product.id && (
-                    <li className="grid">
-                      <SubProducts ProductId={product.id} />
-                    </li>
-                  )}
                 </ul>
               </li>
             ))}

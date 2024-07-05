@@ -2,20 +2,20 @@
 import { createContext, useContext, useState, ReactNode } from "react";
 
 // Define a context for the subcategory refresh
-const SubCategoryContext = createContext({
+const CategoryContext = createContext({
   refresh: () => {},
 });
 
-export const useSubCategoryContext = () => useContext(SubCategoryContext);
+export const useSubCategoryContext = () => useContext(CategoryContext);
 
-export const SubCategoryProvider = ({ children }: { children: ReactNode }) => {
+export const CategoryProvider = ({ children }: { children: ReactNode }) => {
   const [refreshKey, setRefreshKey] = useState(0);
 
   const refresh = () => setRefreshKey((prevKey) => prevKey + 1);
 
   return (
-    <SubCategoryContext.Provider value={{ refresh }}>
+    <CategoryContext.Provider value={{ refresh }}>
       {children}
-    </SubCategoryContext.Provider>
+    </CategoryContext.Provider>
   );
 };

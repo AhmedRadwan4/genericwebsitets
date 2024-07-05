@@ -13,17 +13,22 @@ enum UserRole {
 }
 
 model User {
-  id            String    @id @default(auto()) @map("_id") @db.ObjectId
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          UserRole  @default(USER)
-  accounts      Account[]
-  sessions      Session[]
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  id             String              @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String?             @unique
+  emailVerified  DateTime?
+  image          String?
+  password       String?
+  role           UserRole            @default(USER)
+  accounts       Account[]
+  sessions       Session[]
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  addresses      UserAddress[]
+  paymentMethods UserPaymentMethod[]
+  shoppingCarts  ShoppingCart[]
+  orders         ShopOrder[]
+  reviews        UserReview[]
 }
 
 model Account {
@@ -66,61 +71,221 @@ model VerificationToken {
   @@unique([email, token])
 }
 
+model Country {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  countryName String
+  addresses   Address[]
+}
+
+model Address {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  unitNumber   String?
+  streetNumber String?
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  region       String
+  postalCode   String
+  country      Country       @relation(fields: [countryId], references: [id])
+  countryId    String        @db.ObjectId
+  userAddress  UserAddress[]
+  orders       ShopOrder[]
+}
+
+model UserAddress {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String  @db.ObjectId
+  addressId String  @db.ObjectId
+  isDefault Boolean
+  user      User    @relation(fields: [userId], references: [id])
+  address   Address @relation(fields: [addressId], references: [id])
+}
+
+model ProductCategory {
+  id               String              @id @default(auto()) @map("_id") @db.ObjectId
+  categoryName     String
+  parentCategoryId String?             @db.ObjectId
+  categoryImage    String?
+  parentCategory   ProductCategory?    @relation("SubCategories", fields: [parentCategoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subCategories    ProductCategory[]   @relation("SubCategories")
+  hasSubcategories Boolean             @default(false)
+  variations       Variation[]
+  promotions       PromotionCategory[]
+  products         Product[]
+  hasProducts      Boolean             @default(false)
+}
+
+model Promotion {
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  name         String
+  description  String
+  discountRate Int
+  startDate    DateTime
+  endDate      DateTime
+  categories   PromotionCategory[]
+}
+
+model PromotionCategory {
+  id          String          @id @default(auto()) @map("_id") @db.ObjectId
+  category    ProductCategory @relation(fields: [categoryId], references: [id])
+  categoryId  String          @db.ObjectId
+  promotion   Promotion       @relation(fields: [promotionId], references: [id])
+  promotionId String          @db.ObjectId
+}
+
 model Product {
-  id            String       @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  brand         String?
-  description   String?
-  createdAt     DateTime     @default(now())
-  updatedAt     DateTime?    @updatedAt
-  categoryId    String       @db.ObjectId
-  subCategoryId String       @db.ObjectId
-  category      Category     @relation(fields: [categoryId], references: [id])
-  subCategory   SubCategory  @relation(fields: [subCategoryId], references: [id])
-  subProducts   SubProduct[]
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId   String          @db.ObjectId
+  name         String
+  description  String
+  productImage String
+  category     ProductCategory @relation(fields: [categoryId], references: [id])
+  items        ProductItem[]
 }
 
-model SubProduct {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId
-  sku       String
-  price     Int?
-  stock     Int?
-  discount  Int?     @default(0)
-  sold      Int?     @default(0)
-  images    String[]
-  colorId   String?  @db.ObjectId
-  sizeId    String?  @db.ObjectId
-  productId String   @db.ObjectId
-  color     Color?   @relation(fields: [colorId], references: [id])
-  size      Size?    @relation(fields: [sizeId], references: [id])
-  product   Product  @relation(fields: [productId], references: [id])
+model ProductItem {
+  id                String                 @id @default(auto()) @map("_id") @db.ObjectId
+  productId         String                 @db.ObjectId
+  sku               String
+  qtyInStock        Int
+  price             Int
+  productImage      String
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  product           Product                @relation(fields: [productId], references: [id])
+  configurations    ProductConfiguration[]
+  orderLines        OrderLine[]
+  shoppingCartItems ShoppingCartItem[]
+  inventoryHistory  InventoryHistory[]
 }
 
-model Color {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  color       String?
-  subProducts SubProduct[]
+model InventoryHistory {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  productItemId String      @db.ObjectId
+  changeQty     Int
+  changeDate    DateTime    @default(now())
+  reason        String
+  productItem   ProductItem @relation(fields: [productItemId], references: [id])
 }
 
-model Size {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  size        String
-  subProducts SubProduct[]
-}
-
-model Category {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime?     @updatedAt
-  products      Product[]
-  subCategories SubCategory[]
-}
-
-model SubCategory {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+model Variation {
+  id         String            @id @default(auto()) @map("_id") @db.ObjectId
+  categoryId String            @db.ObjectId
   name       String
-  categoryId String?   @db.ObjectId
-  category   Category? @relation(fields: [categoryId], references: [id])
-  products   Product[]
+  category   ProductCategory   @relation(fields: [categoryId], references: [id])
+  options    VariationOption[]
+}
+
+model VariationOption {
+  id             String                 @id @default(auto()) @map("_id") @db.ObjectId
+  variationId    String                 @db.ObjectId
+  value          String
+  variation      Variation              @relation(fields: [variationId], references: [id])
+  configurations ProductConfiguration[]
+}
+
+model ProductConfiguration {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  productItemId     String          @db.ObjectId
+  variationOptionId String          @db.ObjectId
+  productItem       ProductItem     @relation(fields: [productItemId], references: [id])
+  variationOption   VariationOption @relation(fields: [variationOptionId], references: [id])
+}
+
+model PaymentType {
+  id             String              @id @default(auto()) @map("_id") @db.ObjectId
+  value          String
+  paymentMethods UserPaymentMethod[]
+}
+
+model UserPaymentMethod {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String      @db.ObjectId
+  paymentTypeId String      @db.ObjectId
+  provider      String
+  accountNumber String
+  expiryDate    DateTime
+  isDefault     Boolean
+  user          User        @relation(fields: [userId], references: [id])
+  paymentType   PaymentType @relation(fields: [paymentTypeId], references: [id])
+  orders        ShopOrder[]
+}
+
+model ShoppingCart {
+  id     String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId String             @db.ObjectId
+  items  ShoppingCartItem[]
+  user   User               @relation(fields: [userId], references: [id])
+}
+
+model ShoppingCartItem {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  cartId        String       @db.ObjectId
+  productItemId String       @db.ObjectId
+  qty           Int
+  cart          ShoppingCart @relation(fields: [cartId], references: [id])
+  productItem   ProductItem  @relation(fields: [productItemId], references: [id])
+}
+
+model ShippingMethod {
+  id     String      @id @default(auto()) @map("_id") @db.ObjectId
+  name   String
+  price  Int
+  orders ShopOrder[]
+}
+
+model OrderStatus {
+  id     String      @id @default(auto()) @map("_id") @db.ObjectId
+  status String
+  orders ShopOrder[]
+}
+
+model ShopOrder {
+  id                String            @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String            @db.ObjectId
+  orderDate         DateTime
+  paymentMethodId   String            @db.ObjectId
+  shippingAddressId String            @db.ObjectId
+  shippingMethodId  String            @db.ObjectId
+  orderTotal        Int
+  orderStatusId     String            @db.ObjectId
+  user              User              @relation(fields: [userId], references: [id])
+  paymentMethod     UserPaymentMethod @relation(fields: [paymentMethodId], references: [id])
+  shippingAddress   Address           @relation(fields: [shippingAddressId], references: [id])
+  shippingMethod    ShippingMethod    @relation(fields: [shippingMethodId], references: [id])
+  orderStatus       OrderStatus       @relation(fields: [orderStatusId], references: [id])
+  orderLines        OrderLine[]
+  orderHistories    OrderHistory[]
+}
+
+model OrderHistory {
+  id         String    @id @default(auto()) @map("_id") @db.ObjectId
+  orderId    String    @db.ObjectId
+  status     String
+  changeDate DateTime  @default(now())
+  comment    String?
+  shopOrder  ShopOrder @relation(fields: [orderId], references: [id])
+}
+
+model OrderLine {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  productItemId String       @db.ObjectId
+  orderId       String       @db.ObjectId
+  qty           Int
+  price         Int
+  productItem   ProductItem  @relation(fields: [productItemId], references: [id])
+  order         ShopOrder    @relation(fields: [orderId], references: [id])
+  reviews       UserReview[]
+}
+
+model UserReview {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String    @db.ObjectId
+  orderLineId String    @db.ObjectId
+  ratingValue Int
+  comment     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id])
+  orderLine   OrderLine @relation(fields: [orderLineId], references: [id])
 }

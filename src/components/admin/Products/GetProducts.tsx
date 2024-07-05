@@ -6,3 +6,11 @@ export default async function GetProducts() {
 
   return products;
 }
+
+export async function CheckProduct(productName: string, categoryId: string) {
+  const Category = await db.product.findFirst({
+    where: { name: productName, categoryId: categoryId },
+  });
+
+  return Category;
+}

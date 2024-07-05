@@ -1,6 +1,7 @@
 "use client";
 import * as React from "react";
 import * as z from "zod";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,34 +15,38 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { ProductSchema } from "@/schemas";
-import { useTransition } from "react";
 import { CreateProduct } from "./CreateProduct";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { GetCategories } from "../Cateogry/GetCategories";
+import { GetCategories } from "../Categories/GetCategories";
 import { toast } from "react-toastify";
-import { Category, SubCategory } from "@prisma/client";
-import { GetSubCategories } from "../SubCategory/GetSubCategories";
+import { ProductCategory } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { MdOutlineCancelPresentation } from "react-icons/md";
+import { BsImages, BsPaperclip } from "react-icons/bs";
+import { ProductSchema } from "@/schemas";
+import { CheckProduct } from "./GetProducts";
+import { UploadToS3 } from "@/components/AWS-S3-Express";
+
+// Define type/interface for ProductCategoryGroup
+interface ProductCategoryGroup {
+  [key: string]: ProductCategory[];
+}
 
 export default function AddProduct() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const [isPending, startTransition] = useState(false);
   const [isAdding, setisAdding] = useState(false); // Loading state
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [SubCategories, setSubCategories] = useState<SubCategory[]>([]);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [productCategories, setProductCategories] = useState<ProductCategory[]>(
+    []
+  );
+  const [groupedCategories, setGroupedCategories] =
+    useState<ProductCategoryGroup>({});
+
   useEffect(() => {
     async function fetchCategories() {
       try {
         const categories = await GetCategories();
-        setCategories(categories);
+        setProductCategories(categories);
       } catch (error) {
         toast.error("Failed to fetch categories");
       }
@@ -51,48 +56,77 @@ export default function AddProduct() {
   }, []);
 
   useEffect(() => {
-    async function fetchSubCategories() {
-      try {
-        const Subcategories = await GetSubCategories();
-        setSubCategories(Subcategories);
-      } catch (error) {
-        toast.error("Failed to fetch SubCategories");
-      }
-    }
+    // Group categories by parentId
+    const grouped = productCategories.reduce(
+      (acc: ProductCategoryGroup, category: ProductCategory) => {
+        const parentId = category.parentCategoryId || "root";
+        if (!acc[parentId]) {
+          acc[parentId] = [];
+        }
+        acc[parentId].push(category);
+        return acc;
+      },
+      {}
+    );
 
-    fetchSubCategories();
-  }, []);
+    setGroupedCategories(grouped);
+  }, [productCategories]);
 
   const form = useForm<z.infer<typeof ProductSchema>>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
       name: "",
-      brand: "",
       description: "",
-      categoryId: "",
-      SubcategoryId: "",
+      parentCategoryId: "",
+      productImage: "",
     },
   });
 
-  const OnSubmit = async (data: z.infer<typeof ProductSchema>) => {
+  const OnSubmit = async (formData: z.infer<typeof ProductSchema>) => {
+    const data = { ...formData };
+
+    const ProductCategoryExists = await CheckProduct(
+      data.name,
+      data.parentCategoryId
+    );
+
+    if (ProductCategoryExists) {
+      toast.error("Product Already Exists");
+      return;
+    }
+
     try {
-      const error = await CreateProduct(data);
-      if (error.error) {
-        toast.error("Product Already Exists");
-      } else {
-        toast.success("Product Added");
-        setisAdding(false);
-        router.refresh();
-      }
-    } catch (err) {
-      toast.error("An error occurred while adding the Product");
+      const imageUrls = await Promise.all(
+        selectedImages.map(async (file) => await UploadToS3(file))
+      );
+
+      const validImageUrls = imageUrls.filter(
+        (url): url is string => url !== null
+      );
+
+      data.productImage = validImageUrls.length > 0 ? validImageUrls[0] : "";
+
+      await CreateProduct(
+        data.parentCategoryId,
+        data.name,
+        data.description,
+        data.productImage
+      );
+
+      toast.success("Product Added");
+      setSelectedImages([]); // Clear the selected images
+
+      window.location.reload(); // Refresh the page on successful submission
+    } catch (error) {
+      console.error("An error occurred:", error);
+      toast.error("An error occurred while processing your request");
     }
   };
 
   return (
     <>
       {!isAdding && (
-        <Button className=" w-1/2 mx-auto" onClick={() => setisAdding(true)}>
+        <Button className="w-1/2 mx-auto" onClick={() => setisAdding(true)}>
           Add Product
         </Button>
       )}
@@ -131,29 +165,10 @@ export default function AddProduct() {
                 />
                 <FormField
                   control={form.control}
-                  name="brand"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Brand (Optional)</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isPending}
-                          placeholder="Brand"
-                          type="text"
-                          autoComplete="off"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Description (Optional)</FormLabel>
+                      <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
@@ -169,62 +184,117 @@ export default function AddProduct() {
                 />
                 <FormField
                   control={form.control}
-                  name="categoryId"
+                  name="parentCategoryId"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Choose Category</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {categories.map((category) => (
-                            <SelectItem key={category.id} value={category.id}>
-                              {category.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <FormControl>
+                        <select
+                          {...field}
+                          className="bg-gray-100 p-2 rounded-lg mt-2 dark:bg-gray-700 w-full"
+                          disabled={isPending}
+                          value={field.value || "root"}
+                          onChange={(e) => {
+                            form.setValue("parentCategoryId", e.target.value);
+                          }}
+                        >
+                          {Object.entries(groupedCategories).map(
+                            ([parentId, group]) => {
+                              // Filter out categories with parentId as "root"
+                              if (parentId === "root") {
+                                return null; // Skip rendering for root categories
+                              }
+
+                              const parentCategoryName =
+                                productCategories.find(
+                                  (cat) => cat.id === parentId
+                                )?.categoryName || "Unknown Category";
+
+                              return (
+                                <optgroup
+                                  key={parentId}
+                                  label={parentCategoryName}
+                                >
+                                  {group.map((category) => (
+                                    <option
+                                      key={category.id}
+                                      value={category.id}
+                                    >
+                                      {category.categoryName}
+                                    </option>
+                                  ))}
+                                </optgroup>
+                              );
+                            }
+                          )}
+                        </select>
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
-                ></FormField>
-                {/* subcategory */}
-                <FormField
-                  control={form.control}
-                  name="SubcategoryId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Choose SubCategory</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
+                />
+                {/* Image Upload Handling */}
+                <div className="flex w-[100%] gap-4 p-4 rounded border border-neutral-200 flex-col items-center md:flex-row md:justify-between md:items-center">
+                  <div className="flex md:flex-[1] h-[fit-content] md:p-4 md:justify-between md:flex-row">
+                    {selectedImages.length > 0 ? (
+                      <div className="flex gap-4 flex-wrap">
+                        {selectedImages.map((image, index) => (
+                          <div key={index} className="md:max-w-[200px]">
+                            <Image
+                              src={URL.createObjectURL(image)}
+                              alt={`Selected ${index + 1}`}
+                              width={200}
+                              height={200}
+                              className="object-cover w-auto h-auto"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center justify-between">
+                        <div className="p-3 bg-slate-200 justify-center items-center flex">
+                          <BsImages size={56} />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="productImage"
+                    render={({ field }) => (
+                      <FormItem>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a Subcategory" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {SubCategories.map((Subcategories) => (
-                            <SelectItem
-                              key={Subcategories.id}
-                              value={Subcategories.id}
+                          <Button size="lg" type="button">
+                            <input
+                              type="file"
+                              className="hidden"
+                              id="fileInput"
+                              accept="image/*"
+                              onBlur={field.onBlur}
+                              name={field.name}
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                field.onChange(files);
+                                setSelectedImages(files);
+                              }}
+                              ref={field.ref}
+                            />
+                            <label
+                              htmlFor="fileInput"
+                              className="text-neutral-90 rounded-md cursor-pointer inline-flex items-center"
                             >
-                              {Subcategories.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                ></FormField>
+                              <BsPaperclip />
+                              <span className="whitespace-nowrap">
+                                Choose The Product&apos;s Main Image
+                              </span>
+                            </label>
+                          </Button>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <Button disabled={isPending} type="submit" className="w-full">

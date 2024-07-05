@@ -1,11 +1,16 @@
-import { auth } from "@/auth";
-
-export default async function Dashboard() {
-  const session = await auth();
+export default async function Users() {
   return (
     <div className="container">
-      users page
-      {session?.user.role}
+      <select name="toys" id="toy-id" className="select-input">
+        <optgroup label="Musical toys">
+          <option value="Dancing Doll">Dancing Doll</option>
+          <option value="Alphabet laptop">Alphabet laptop</option>
+        </optgroup>
+        <optgroup label="Remote toys">
+          <option value="Robots">Robots</option>
+          <option value="Transformers">Transformers</option>
+        </optgroup>
+      </select>
     </div>
   );
 }

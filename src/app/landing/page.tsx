@@ -58,46 +58,46 @@ export default function Home() {
         />
       </Carousel>
 
-      {/* <div className="grid w-[90%] mx-auto grid-cols-3"> */}
-      {/* {products.map((product) => (
-        <Card
-          key={product.id}
-          className="max-w-sm mb-5"
-          imgAlt={product.title}
-          imgSrc={product.imgSrc}
-        >
-          <a href="#">
-            <h5 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
-              {product.title}
-            </h5>
-          </a>
+      {/* <div className="grid w-[90%] mx-auto grid-cols-3">
+        {products.map((product) => (
+          <Card
+            key={product.id}
+            className="max-w-sm mb-5"
+            imgAlt={product.title}
+            imgSrc={product.imgSrc}
+          >
+            <a href="#">
+              <h5 className="text-xl font-semibold tracking-tight text-gray-900 dark:text-white">
+                {product.title}
+              </h5>
+            </a>
 
-          <div className="flex items-center justify-between">
-            <span className="text-3xl font-bold text-gray-900 dark:text-white">
-              {product.price}
-            </span>
+            <div className="flex items-center justify-between">
+              <span className="text-3xl font-bold text-gray-900 dark:text-white">
+                {product.price}
+              </span>
 
-            {allIds.includes(product.id) ? (
-              <a
-                href="#"
-                className="rounded-lg bg-cyan-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-cyan-800"
-                onClick={() => handleDelete(product)}
-              >
-                Delete
-              </a>
-            ) : (
-              <a
-                href="#"
-                className="rounded-lg bg-cyan-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-cyan-800"
-                onClick={() => handleAddToCart(product)}
-              >
-                Add to cart
-              </a>
-            )}
-          </div>
-        </Card>
-      ))} */}
-      {/*  </div> */}
+              {allIds.includes(product.id) ? (
+                <a
+                  href="#"
+                  className="rounded-lg bg-cyan-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-cyan-800"
+                  onClick={() => handleDelete(product)}
+                >
+                  Delete
+                </a>
+              ) : (
+                <a
+                  href="#"
+                  className="rounded-lg bg-cyan-700 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-cyan-800 focus:outline-none focus:ring-4 focus:ring-cyan-300 dark:bg-cyan-600 dark:hover:bg-cyan-700 dark:focus:ring-cyan-800"
+                  onClick={() => handleAddToCart(product)}
+                >
+                  Add to cart
+                </a>
+              )}
+            </div>
+          </Card>
+        ))}
+      </div> */}
     </div>
   );
 }

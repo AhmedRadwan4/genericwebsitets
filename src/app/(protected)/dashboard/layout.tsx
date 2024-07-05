@@ -5,11 +5,12 @@ import {
   HiArrowSmRight,
   HiChartPie,
   HiInbox,
-  HiShoppingBag,
+  HiOutlineColorSwatch,
   HiUser,
 } from "react-icons/hi";
+import { RiCouponLine } from "react-icons/ri";
 import { FaBoxes } from "react-icons/fa";
-import { FaCodeBranch } from "react-icons/fa6";
+import { FaPenRuler } from "react-icons/fa6";
 import { TbCategory2 } from "react-icons/tb";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -59,26 +60,29 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
             >
               Products
             </Sidebar.Item>
-            <Sidebar.Collapse
-              icon={HiShoppingBag}
-              label="Categorization"
-              open={true}
+            <Sidebar.Item
+              href="/dashboard/categories"
+              icon={TbCategory2}
+              active={pathname === "/dashboard/categories"}
             >
-              <Sidebar.Item
-                href="/dashboard/categories"
-                icon={TbCategory2}
-                active={pathname === "/dashboard/categories"}
-              >
-                Categories
-              </Sidebar.Item>
-              <Sidebar.Item
-                href="/dashboard/subcategories"
-                icon={FaCodeBranch}
-                active={pathname === "/dashboard/subcategories"}
-              >
-                SubCategories
-              </Sidebar.Item>
-            </Sidebar.Collapse>
+              Categories
+            </Sidebar.Item>
+          </Sidebar.ItemGroup>
+          <Sidebar.ItemGroup>
+            <Sidebar.Item
+              href="/dashboard/coupons"
+              icon={RiCouponLine}
+              active={pathname === "/dashboard/coupons"}
+            >
+              Coupons
+            </Sidebar.Item>
+            <Sidebar.Item
+              href="/dashboard/variations"
+              icon={FaPenRuler}
+              active={pathname === "/dashboard/variations"}
+            >
+              Variations
+            </Sidebar.Item>
           </Sidebar.ItemGroup>
           <Sidebar.ItemGroup>
             <Sidebar.Item
@@ -89,7 +93,11 @@ export default function Dashboard({ children }: { children: React.ReactNode }) {
               Users
             </Sidebar.Item>
 
-            <Sidebar.Item href="#" icon={HiInbox}>
+            <Sidebar.Item
+              href="/dashboard/orders"
+              icon={HiInbox}
+              active={pathname === "/dashboard/orders"}
+            >
               Orders
             </Sidebar.Item>
           </Sidebar.ItemGroup>

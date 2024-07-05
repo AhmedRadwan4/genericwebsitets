@@ -1,14 +1,16 @@
-import AddCategory from "@/components/admin/Cateogry/AddCategory";
-import ListCategories from "@/components/admin/Cateogry/ListCategory";
+import AddCategory from "@/components/admin/Categories/AddCategory";
+import ListCategory from "@/components/admin/Categories/ListCategories";
 
 export default function Categories() {
   return (
     <>
-      <div className="block w-full">
-        <AddCategory />
-      </div>
-      <div className="">
-        <ListCategories />
+      <div className="flex flex-col">
+        <div className="">
+          <AddCategory />
+        </div>
+        <div className="">
+          <ListCategory />
+        </div>
       </div>
     </>
   );

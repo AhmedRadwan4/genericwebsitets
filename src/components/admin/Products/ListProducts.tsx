@@ -1,14 +1,14 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import GetProducts from "./GetProducts"; // Function to fetch products from API
+import { GetProducts } from "./GetProducts"; // Function to fetch products from API
 import { FaRegEdit, FaTrash } from "react-icons/fa"; // Icons for edit, save, delete
 import { IoMdAddCircleOutline } from "react-icons/io"; // Icon for add product
 import { Button, Modal } from "flowbite-react"; // Modal and button components from flowbite-react
 import { HiOutlineExclamationCircle } from "react-icons/hi"; // Icon for delete confirmation
 import DeleteProduct from "./DeleteProduct"; // Component to handle product deletion
 import { toast } from "react-toastify"; // Toast notifications library
-import { Product, ProductCategory } from "@prisma/client";
+import { Product } from "@prisma/client";
 import { GetCategory } from "../Categories/GetCategories"; // Assuming getCategory is the correct function name
 
 // Functional component ListProducts
@@ -161,7 +161,7 @@ const ListProducts: React.FC = () => {
                       <FaRegEdit size={20} />
                     </button>
                     <a
-                      href={`/dashboard/subproducts?id=${product.id}`}
+                      href={`/dashboard/productItem?id=${product.id}`}
                       className="text-green-500 hover:green-700"
                     >
                       <IoMdAddCircleOutline size={20} />

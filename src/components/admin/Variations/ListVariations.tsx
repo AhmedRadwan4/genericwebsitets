@@ -6,9 +6,10 @@ import { Button, Modal } from "flowbite-react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
 import { GetVariations } from "./GetVariations";
 import { GetCategory } from "../Categories/GetCategories";
-import { Variation } from "@prisma/client";
-import { CreateVariationOption } from "./CreateVariationOption";
-import { GetVariationOption } from "./GetVariationOptions";
+import { Variation, VariationOption } from "@prisma/client";
+import { CreateVariationOption } from "./CreateVariation";
+import { GetVariationOptions } from "./GetVariations";
+import { EditVariation, EditVariationOption } from "./EditVariation";
 
 const ListVariations: React.FC = () => {
   const [variationsObject, setVariationsObject] = useState<Variation[]>([]);
@@ -30,10 +31,12 @@ const ListVariations: React.FC = () => {
   const [isAdding, setIsAdding] = useState<string | null>(null);
   const [valueName, setValueName] = useState<string>("");
   const [variationOptions, setVariationOptions] = useState<{
-    [key: string]: string[];
+    [key: string]: VariationOption[];
   }>({});
+  const [editingVariationOptions, setEditingVariationOptions] = useState<
+    VariationOption[]
+  >([]);
 
-  // Update the setVariationOptions to store the variation option names
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -80,8 +83,8 @@ const ListVariations: React.FC = () => {
 
         const optionsMap = await Promise.all(
           variations.map(async (variation) => {
-            const options = await GetVariationOption(variation.id);
-            return { [variation.id]: options.map((option) => option.value) };
+            const options = await GetVariationOptions(variation.id);
+            return { [variation.id]: options };
           })
         );
 
@@ -119,19 +122,41 @@ const ListVariations: React.FC = () => {
   const handleEditClick = (variation: Variation) => {
     setEditingVariation(variation);
     setNewVariationName(variation.name);
+    setEditingVariationOptions(variationOptions[variation.id] || []);
   };
 
   const handleSaveClick = async () => {
     if (editingVariation) {
-      // Save the edited variation
-      // Example: await saveVariation(editingVariation.id, newVariationName);
+      await EditVariation(editingVariation.id, newVariationName);
+
+      const oldVariationOption = variationOptions[editingVariation.id] || [];
+      for (let i = 0; i < editingVariationOptions.length; i++) {
+        await EditVariationOption(
+          editingVariation.id,
+          editingVariationOptions[i].value,
+          oldVariationOption[i].value
+        );
+      }
+
+      // Refresh variations after saving
+      const variations = await GetVariations();
+      setVariationsObject(variations);
       setEditingVariation(null);
+    }
+  };
+
+  const handleOptionChange = (index: number, value: string) => {
+    if (editingVariation) {
+      const newOptions = [...editingVariationOptions];
+      newOptions[index] = { ...newOptions[index], value };
+      setEditingVariationOptions(newOptions);
     }
   };
 
   const handleCancelEditClick = () => {
     setEditingVariation(null);
     setNewVariationName("");
+    setEditingVariationOptions([]);
   };
 
   const handleDeleteClick = async (variationId: string) => {
@@ -176,7 +201,6 @@ const ListVariations: React.FC = () => {
               <div key={parentCategory} className="mb-6">
                 <h2 className="text-xl font-bold mb-4">
                   <hr className="my-4 border-gray-300 border-t-2" />
-
                   {parentCategory || "Uncategorized"}
                 </h2>
 
@@ -193,14 +217,38 @@ const ListVariations: React.FC = () => {
                           >
                             <div className="flex justify-between items-center">
                               {editingVariation?.id === variation.id ? (
-                                <input
-                                  type="text"
-                                  value={newVariationName}
-                                  onChange={(e) =>
-                                    setNewVariationName(e.target.value)
-                                  }
-                                  className="flex-1 mr-4"
-                                />
+                                <div className="flex-1">
+                                  <input
+                                    type="text"
+                                    value={newVariationName}
+                                    onChange={(e) =>
+                                      setNewVariationName(e.target.value)
+                                    }
+                                    className="flex-1 mr-4"
+                                  />
+                                  <div className="mt-2">
+                                    {editingVariationOptions.map(
+                                      (option, index) => (
+                                        <div
+                                          key={index}
+                                          className="flex items-center mb-2"
+                                        >
+                                          <input
+                                            type="text"
+                                            value={option.value}
+                                            onChange={(e) =>
+                                              handleOptionChange(
+                                                index,
+                                                e.target.value
+                                              )
+                                            }
+                                            className="flex-1 mr-2"
+                                          />
+                                        </div>
+                                      )
+                                    )}
+                                  </div>
+                                </div>
                               ) : (
                                 <div className="flex-1">
                                   <span>{variation.name}</span>
@@ -209,9 +257,9 @@ const ListVariations: React.FC = () => {
                                       0 && (
                                       <div className="mt-2 text-gray-600 dark:text-gray-400">
                                         Options:{" "}
-                                        {variationOptions[variation.id].join(
-                                          ", "
-                                        )}
+                                        {variationOptions[variation.id]
+                                          .map((option) => option.value)
+                                          .join(", ")}
                                       </div>
                                     )}
                                 </div>

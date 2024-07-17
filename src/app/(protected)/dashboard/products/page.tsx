@@ -1,7 +1,7 @@
 import AddProduct from "@/components/admin/Products/AddProduct";
 import ListProducts from "@/components/admin/Products/ListProducts";
 import "react-toastify/ReactToastify.min.css";
-export default function Categories() {
+export default function Product() {
   return (
     <>
       <div>

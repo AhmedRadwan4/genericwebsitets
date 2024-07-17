@@ -1,8 +1,16 @@
 "use server";
 import { db } from "@/lib/db";
 
-export default async function GetProducts() {
+export async function GetProducts() {
   const products = await db.product.findMany();
+
+  return products;
+}
+
+export async function GetProduct(productId: string) {
+  const products = await db.product.findFirst({
+    where: { id: productId },
+  });
 
   return products;
 }

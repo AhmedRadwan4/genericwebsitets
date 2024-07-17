@@ -67,7 +67,7 @@ export default function AddCategory() {
     },
   });
 
-  const onSubmit = async (formData: z.infer<typeof ProductCategorySchema>) => {
+  const OnSubmit = async (formData: z.infer<typeof ProductCategorySchema>) => {
     startTransition(async () => {
       const data = { ...formData };
       const ProductCategoryExists = await CheckCategory(
@@ -118,7 +118,7 @@ export default function AddCategory() {
         Create New Category
       </h1>
       <form
-        onSubmit={form.handleSubmit(onSubmit)}
+        onSubmit={form.handleSubmit(OnSubmit)}
         className="space-y-6 w-1/2 mx-auto"
       >
         {/* Subcategory name */}

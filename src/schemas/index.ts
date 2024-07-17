@@ -74,3 +74,28 @@ export const VariationSchema = z.object({
   variationName: z.string().min(1, { message: "Variation Name is required" }),
   categoryId: z.string().min(1, { message: "Category is required" }),
 });
+
+export const ProductItemSchema = z.object({
+  productId: z.string(),
+  sku: z.string().min(1, { message: "SKU is required" }),
+  price: z.coerce.number().min(1, { message: "Price is required" }),
+  quantity: z.number().min(1, { message: "Quantity is required" }),
+  variationIds: z.record(z.string(), z.string()).optional(),
+  productItemImage: z
+    .any()
+    .refine((files) => files && files.length > 0, "Please upload a file.")
+    .refine((files) => {
+      return (
+        files &&
+        Array.from(files as File[]).every((file) => file.size <= MAX_FILE_SIZE)
+      );
+    }, `Max image size is 5MB.`)
+    .refine((files) => {
+      return (
+        files &&
+        Array.from(files as File[]).every((file) =>
+          ACCEPTED_IMAGE_MIME_TYPES.includes(file.type)
+        )
+      );
+    }, "Only .jpg, .jpeg, .png and .webp formats are supported."),
+});

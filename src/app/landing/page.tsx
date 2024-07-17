@@ -4,8 +4,6 @@ import { addItem, deleteItem } from "../../redux/slices/cartslice";
 import { Carousel, Card } from "flowbite-react";
 import Image from "next/image";
 import { RootState } from "../../redux/store"; // Adjust the path to your store
-// import GetSubProducts from "../../components/admin/Products/SubProducts/GetSubProducts";
-import { SubProduct } from "@prisma/client";
 // Define the Product type
 
 export default function Home() {
